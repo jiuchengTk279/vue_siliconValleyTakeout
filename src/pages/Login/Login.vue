@@ -4,39 +4,40 @@
             <div class="login_header">
                 <h2 class="login_logo">硅谷外卖</h2>
                 <div class="login_header_title">
-                    <a href="javascript:;" class="on">短信登录</a>
-                    <a href="javascript:;">密码登录</a>
+                    <a href="javascript:;" :class="{on: loginWay}" @click="handleToLoginWay">短信登录</a>
+                    <a href="javascript:;" :class="{on: !loginWay}" @click="handleToLoginWay">密码登录</a>
                 </div>
             </div>
             <div class="login_content">
-                <form>
-                    <div class="on">
+                <form @submit.prevent="login">
+                    <div :class="{on: loginWay}">
                         <section class="login_message">
-                            <input type="tel" maxlength="11" placeholder="手机号">
-                            <button disabled="disabled" class="get_verification">获取验证码</button>
+                            <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
+                            <button :disabled="!rightPhone" class="get_verification" :class="{right_phone: rightPhone}" @click.prevent="sendCode">{{ computedTime>0 ? `已发送(${computedTime}s)` : '发送验证码'}}</button>
                         </section>
                         <section class="login_verification">
-                            <input type="tel" maxlength="8" placeholder="验证码">
+                            <input type="tel" maxlength="8" placeholder="验证码" v-model="code">
                         </section>
                         <section class="login_hint">
                             温馨提示：未注册硅谷外卖帐号的手机号，登录时将自动注册，且代表已同意
                             <a href="javascript:;">《用户服务协议》</a>
                         </section>
                     </div>
-                    <div>
+                    <div :class="{on: !loginWay}">
                         <section>
                             <section class="login_message">
-                                <input type="tel" maxlength="11" placeholder="手机/邮箱/用户名">
+                                <input type="text" maxlength="11" placeholder="手机/邮箱/用户名" v-model="name">
                             </section>
                             <section class="login_verification">
-                                <input type="tel" maxlength="8" placeholder="密码">
-                            <div class="switch_button off">
-                                <div class="switch_circle"></div>
-                                <span class="switch_text">...</span>
+                                <input type="text" maxlength="8" placeholder="密码" v-model="pwd" v-if="showPwd">
+                                <input type="password" maxlength="8" placeholder="密码" v-model="pwd">
+                            <div class="switch_button off" @click="handleShowPwd" :class="showPwd ? 'on': 'off'">
+                                <div class="switch_circle" :class="{right: showPwd}"></div>
+                                <span class="switch_text">{{ showPwd ? 'abc' : '...'}}</span>
                             </div>
                             </section>
                                 <section class="login_message">
-                                <input type="text" maxlength="11" placeholder="验证码">
+                                <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
                                 <img class="get_verification" src="./images/captcha.svg" alt="captcha">
                             </section>
                         </section>
@@ -49,15 +50,114 @@
                 <i class="iconfont iconjiantou"></i>
             </a>
         </div>
+        <AlertTip :alertText="alertText" v-show="showAlert" @closeTip="closeTip"></AlertTip>
     </div>
 </template>
 
 <script>
+import AlertTip from '../../components/AlertTip/AlertTip.vue'
 export default {
   name: 'Login',
+  data () {
+    return {
+      // loginWay 为true时短信登录，为false时为密码登录
+      loginWay: true,
+      // 手机号
+      phone: '',
+      // 计算的倒计时时间
+      computedTime: 0,
+      // 密码
+      pwd: '',
+      // 密码展示，默认为false，不展示
+      showPwd: false,
+      // 短信验证码
+      code: '',
+      // 用户名
+      name: '',
+      // 图形验证码
+      captcha: '',
+      // 弹出框提示文本
+      alertText: '',
+      // 显示弹出框，默认为不展示
+      showAlert: false
+    }
+  },
+  components: {
+    AlertTip
+  },
   methods: {
+    // 返回功能
     handleToBack () {
       this.$router.back()
+    },
+    // 切换登录方式
+    handleToLoginWay () {
+      this.loginWay = !this.loginWay
+    },
+    // 异步获取短信
+    sendCode () {
+      // 如果当前没有计时
+      if (!this.computedTime) {
+        // 设计倒计时的时间
+        this.computedTime = 30
+        // 开启倒计时
+        const intervalId = setInterval(() => {
+          this.computedTime--
+          // 如果时间小于等于0，那么就清除定时器
+          if (this.computedTime <= 0) {
+            clearInterval(intervalId)
+          }
+        }, 1000)
+      }
+
+      // 发送ajax请求，向指定的手机号进行发送
+    },
+    // 展示密码
+    handleShowPwd () {
+      this.showPwd = !this.showPwd
+    },
+    // 关闭弹出警示框
+    closeTip () {
+      this.showAlert = false
+      this.alertText = ''
+    },
+    // 异步登录
+    login () {
+      // 前台表单验证
+      if (this.loginWay) {
+        // 短信验证登录
+        const { rightPhone, phone, code } = this
+        if (!this.rightPhone) {
+          // 手机号不正确
+          this.showAlert = true
+          this.alertText = '手机号不正确'
+        } else if (!/^\d{6}$/.test(this.code)) {
+          // 短信验证码不正确
+          this.showAlert = true
+          this.alertText = '短信验证码不正确'
+        }
+      } else {
+        // 密码验证登录
+        const { name, pwd, captcha } = this
+        if (!this.name) {
+          // 用户名必须指定
+          this.showAlert = true
+          this.alertText = '用户名必须指定'
+        } else if (!this.pwd) {
+          // 密码必须指定
+          this.showAlert = true
+          this.alertText = '密码必须指定'
+        } else if (!this.captcha) {
+          // 图形验证码必须指定
+          this.showAlert = true
+          this.alertText = '图形验证码必须指定'
+        }
+      }
+    }
+  },
+  computed: {
+    rightPhone () {
+      return /^1\d{10}$/.test(this.phone)
     }
   }
 }
@@ -124,6 +224,8 @@ export default {
                                 color #ccc
                                 font-size 14px
                                 background transparent
+                                &.right_phone
+                                    color black
                         .login_verification
                             position relative
                             margin-top 16px
@@ -149,6 +251,7 @@ export default {
                                     .switch_text
                                         float right
                                         color #ddd
+                                        padding-right 10px
                                 &.on
                                     background #02a774
                                 >.switch_circle
@@ -163,6 +266,8 @@ export default {
                                     background #fff
                                     box-shadow 0 2px 4px 0 rgba(0,0,0,.1)
                                     transition transform .3s
+                                    &.right
+                                        transform translateX(30px)
                         .login_hint
                             margin-top 12px
                             color #999
