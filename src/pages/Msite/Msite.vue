@@ -2,12 +2,15 @@
     <div class="msite">
         <!--首页头部-->
         <HeaderTop :title="address.name">
-            <span class="header_search" slot="left">
+            <router-link class="header_search" slot="left" to="/search">
                 <i class="iconfont iconsousuo"></i>
-            </span>
-            <span class="header_login" slot="right">
-                <span class="header_login_text">登录|注册</span>
-            </span>
+            </router-link>
+            <router-link class="header_login" slot="right" :to="userInfo._id ? '/userInfo' : '/login'">
+                <span class="header_login_text" v-if="!userInfo._id">登录|注册</span>
+                <span class="header_login_text" v-else>
+                    <i class="iconfont iconwo"></i>
+                </span>
+            </router-link>
         </HeaderTop>
         <!--首页导航-->
         <nav class="msite_nav" v-if="categories.length">
@@ -59,6 +62,7 @@ export default {
   },
   mounted () {
     // 1. 调用actions
+    // this.$store.dispatch('recordUser')
     this.$store.dispatch('getCategories')
     this.$store.dispatch('getShops')
     // 创建一个Swiper 实例对象，实现轮播
@@ -91,7 +95,7 @@ export default {
   },
   computed: {
     // 2. 取state中的数据  3. 显示数据
-    ...mapState(['address', 'categories']),
+    ...mapState(['address', 'categories', 'userInfo']),
     // 根据categories一维数组生成一个二维数组，小数组的元素个数最大是8
     categoriesArr () {
       const {categories} = this

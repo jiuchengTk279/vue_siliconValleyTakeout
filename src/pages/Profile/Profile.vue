@@ -2,17 +2,19 @@
     <div class="profile">
         <HeaderTop title="我的"></HeaderTop>
         <div class="profile-number">
-            <router-link to="/login"  class="profile-link">
+            <!-- 点击链接后，如果存在userInfo._id，路由跳转到用户信息页，如果不存在就跳转到登录页 -->
+            <router-link :to="userInfo._id ? '/userInfo' : '/login'"  class="profile-link">
                 <div class="profile_image">
                     <i class="iconfont iconren"></i>
                 </div>
                 <div class="user-info">
-                    <p class="user-info-top">登录/注册</p>
+                    <!-- userInfo开始为空对象，phone的值也是没有的，所以userInfo.phone为false，取反就为true,那么就为 '登录/注册'-->
+                    <p class="user-info-top" v-if="!userInfo.phone">{{ userInfo.name || '登录/注册' }}</p>
                     <p>
                         <span class="user-icon">
                         <i class="iconfont icon-shouji iconshouji"></i>
                         </span>
-                        <span class="icon-mobile-number">暂无绑定手机号</span>
+                        <span class="icon-mobile-number">{{userInfo.phone || '暂无绑定手机号'}}</span>
                     </p>
                 </div>
                 <span class="arrow">
@@ -88,16 +90,39 @@
                 </div>
             </a>
         </div>
+
+        <div class="profile_my_order border-1px">
+            <mt-button type="danger" style="width: 100%" v-if="userInfo._id" @click="logout">退出登录</mt-button>
+        </div>
     </div>
 </template>
 
 <script>
 import HeaderTop from '../../components/HeaderTop/HeaderTop.vue'
+import { mapState } from 'vuex'
+import { MessageBox, Toast } from 'mint-ui'
 
 export default {
   name: 'Profile',
   components: {
     HeaderTop
+  },
+  computed: {
+    ...mapState(['userInfo'])
+  },
+  methods: {
+    logout () {
+      MessageBox.confirm('确认退出吗？').then(
+        action => {
+          // 请求退出
+          this.$store.dispatch('logout')
+          Toast('登出成功')
+        },
+        action => {
+          // 点击取消
+        }
+      )
+    }
   }
 }
 </script>
