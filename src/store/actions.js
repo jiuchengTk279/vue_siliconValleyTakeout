@@ -1,6 +1,6 @@
 // 通过mutation间接更新state的多个方法的对象
-import {RECEIVE_ADDRESS, RECEIVE_CATEGORIES, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO} from './mutation-types.js'
-import {reqAddress, reqFoodList, reqShopList, reqUserInfo, reqLogout} from '../api'
+import {RECEIVE_ADDRESS, RECEIVE_CATEGORIES, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_SHOP_INFO, RECEIVE_SHOP_RATINGS, RECEIVE_SHOP_GOODS, INCREMENT_FOOD_COUNT, DECREMENT_FOOD_COUNT, CLEAR_CART} from './mutation-types.js'
+import {reqAddress, reqFoodList, reqShopList, reqUserInfo, reqLogout, reqShopInfo, reqShopGoods, reqShopRatings} from '../api'
 
 export default {
   // 异步获取地址
@@ -65,5 +65,53 @@ export default {
     if (result.code === 0) {
       commit(RESET_USER_INFO)
     }
+  },
+
+  // 异步获取商家的信息
+  async getShopInfo ({commit}, shopInfo) {
+    // 发起异步的ajax请求
+    const result = await reqShopInfo()
+    if (result.code === 0) {
+      const shopInfo = result.data
+      commit(RECEIVE_SHOP_INFO, {shopInfo})
+    }
+  },
+
+  // 异步获取商家的评价
+  async getShopRatings ({commit}, shopRatings) {
+    // 发起异步的ajax请求
+    const result = await reqShopRatings()
+    if (result.code === 0) {
+      const shopRatings = result.data
+      commit(RECEIVE_SHOP_RATINGS, {shopRatings})
+    }
+  },
+
+  // 异步获取商家的商品
+  async getShopGoods ({commit}, callback) {
+    // 发起异步的ajax请求
+    const result = await reqShopGoods()
+    if (result.code === 0) {
+      const shopGoods = result.data
+      commit(RECEIVE_SHOP_GOODS, {shopGoods})
+      callback && callback()
+    }
+  },
+
+  // 同步更新food中的count值，接收 isAdd 和 food的值
+  updateFoodCount ({commit}, {isAdd, food}) {
+    // 点击增加
+    if (isAdd) {
+      // 提交增加
+      commit(INCREMENT_FOOD_COUNT, {food})
+    } else {
+      // 提交减少
+      commit(DECREMENT_FOOD_COUNT, {food})
+    }
+  },
+
+  // 同步更新清除购物车
+  clearCart ({commit}) {
+    commit(CLEAR_CART)
   }
 }

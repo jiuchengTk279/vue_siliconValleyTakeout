@@ -38,6 +38,32 @@ export default new Router({
       }
     },
     {
+      path: '/shop',
+      name: 'Shop',
+      component: () => import('../pages/Shop/Shop.vue'),
+      children: [
+        {
+          path: '/shop/goods',
+          name: 'ShopGoods',
+          component: () => import('../pages/Shop/ShopGoods/ShopGoods.vue')
+        },
+        {
+          path: '/shop/info',
+          name: 'ShopInfo',
+          component: () => import('../pages/Shop/ShopInfo/ShopInfo.vue')
+        },
+        {
+          path: '/shop/ratings',
+          name: 'ShopRatings',
+          component: () => import('../pages/Shop/ShopRatings/ShopRatings.vue')
+        },
+        {
+          path: '',
+          redirect: '/shop/goods'
+        }
+      ]
+    },
+    {
       path: '/login',
       name: 'Login',
       component: () => import('../pages/Login/Login.vue')

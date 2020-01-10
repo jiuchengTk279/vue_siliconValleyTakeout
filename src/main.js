@@ -6,6 +6,9 @@ import router from './router'
 import store from './store'
 import {Button} from 'mint-ui'
 
+// 加载 mockServer
+import './mock/mockServer.js'
+
 Vue.config.productionTip = false
 
 // 注册全局组件标签
