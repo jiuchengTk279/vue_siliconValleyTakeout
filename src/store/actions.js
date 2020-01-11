@@ -1,6 +1,6 @@
 // 通过mutation间接更新state的多个方法的对象
-import {RECEIVE_ADDRESS, RECEIVE_CATEGORIES, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_SHOP_INFO, RECEIVE_SHOP_RATINGS, RECEIVE_SHOP_GOODS, INCREMENT_FOOD_COUNT, DECREMENT_FOOD_COUNT, CLEAR_CART} from './mutation-types.js'
-import {reqAddress, reqFoodList, reqShopList, reqUserInfo, reqLogout, reqShopInfo, reqShopGoods, reqShopRatings} from '../api'
+import {RECEIVE_ADDRESS, RECEIVE_CATEGORIES, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_SHOP_INFO, RECEIVE_SHOP_RATINGS, RECEIVE_SHOP_GOODS, INCREMENT_FOOD_COUNT, DECREMENT_FOOD_COUNT, CLEAR_CART, RECEIVE_SEARCH_SHOPS} from './mutation-types.js'
+import {reqAddress, reqFoodList, reqShopList, reqUserInfo, reqLogout, reqShopInfo, reqShopGoods, reqShopRatings, reqSearchShopList} from '../api'
 
 export default {
   // 异步获取地址
@@ -78,12 +78,13 @@ export default {
   },
 
   // 异步获取商家的评价
-  async getShopRatings ({commit}, shopRatings) {
+  async getShopRatings ({commit}, callback) {
     // 发起异步的ajax请求
     const result = await reqShopRatings()
     if (result.code === 0) {
       const shopRatings = result.data
       commit(RECEIVE_SHOP_RATINGS, {shopRatings})
+      callback && callback()
     }
   },
 
@@ -113,5 +114,17 @@ export default {
   // 同步更新清除购物车
   clearCart ({commit}) {
     commit(CLEAR_CART)
+  },
+
+  // 异步获取搜索的商家列表
+  async searchShops ({commit, state}, keyword) {
+    // 获取经纬度的位置信息
+    const geohash = state.latitude + '' + state.longitude
+    // 发起异步的ajax请求
+    const result = await reqSearchShopList(geohash, keyword)
+    if (result.code === 0) {
+      const searchShops = result.data
+      commit(RECEIVE_SEARCH_SHOPS, {searchShops})
+    }
   }
 }

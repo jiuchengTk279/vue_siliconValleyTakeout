@@ -1,6 +1,6 @@
 // 直接更新state的多个方法的对象
 import Vue from 'vue'
-import {RECEIVE_ADDRESS, RECEIVE_CATEGORIES, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_SHOP_INFO, RECEIVE_SHOP_RATINGS, RECEIVE_SHOP_GOODS, INCREMENT_FOOD_COUNT, DECREMENT_FOOD_COUNT, CLEAR_CART} from './mutation-types.js'
+import {RECEIVE_ADDRESS, RECEIVE_CATEGORIES, RECEIVE_SHOPS, RECEIVE_USER_INFO, RESET_USER_INFO, RECEIVE_SHOP_INFO, RECEIVE_SHOP_RATINGS, RECEIVE_SHOP_GOODS, INCREMENT_FOOD_COUNT, DECREMENT_FOOD_COUNT, CLEAR_CART, RECEIVE_SEARCH_SHOPS} from './mutation-types.js'
 
 export default {
   [RECEIVE_ADDRESS] (state, {address}) {
@@ -52,8 +52,11 @@ export default {
   },
   [CLEAR_CART] (state) {
     // 清除购物车中food的count
-    state.cartFoods.forEach((food) => food.count = 0)
+    state.cartFoods.forEach((food) => { food.count = 0 })
     // 清除购物车中的cartFoods，所有的购物项
     state.cartFoods = []
+  },
+  [RECEIVE_SEARCH_SHOPS] (state, {searchShops}) {
+    state.searchShops = searchShops
   }
 }

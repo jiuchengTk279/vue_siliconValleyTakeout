@@ -9,5 +9,6 @@ export default {
   shopInfo: {}, // 商家信息
   shopRatings: [], // 商家评价
   shopGoods: [], // 商家商品
-  cartFoods: [] // 购物车中的食品
+  cartFoods: [], // 购物车中的食品
+  searchShops: [] // 搜索得到的商家列表
 }
